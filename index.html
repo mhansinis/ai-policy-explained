@@ -4,140 +4,147 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Policy, Explained</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0f172a;
-    --text: #e2e8f0;
-    --muted: #94a3b8;
-    --muted-dim: #64748b;
-    --rule: #334155;
-    --card: #1e293b;
-    --accent: #60a5fa;
-  }
-  * { box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+  ::selection { background: #1a1a18; color: #f7f5f0; }
   body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-    line-height: 1.75;
-    -webkit-font-smoothing: antialiased;
+    background: #f7f5f0;
+    color: #1a1a18;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    min-height: 100vh;
   }
-  .wrap {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 72px 24px 96px;
+  a { color: inherit; }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(247,245,240,0.94);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #d9d5cb;
   }
-  header { margin-bottom: 8px; }
-  h1 {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 2.8rem;
-    font-weight: 700;
-    color: #f8fafc;
-    letter-spacing: -0.02em;
-    margin: 0 0 18px;
+  .topbar-inner {
+    max-width: 1240px; margin: 0 auto; padding: 0 32px;
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    height: 56px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
   }
-  .rule {
-    border: none;
-    border-top: 1px solid var(--rule);
-    margin: 0 0 14px;
+  .topbar-inner .brand { color: #1a1a18; text-decoration: none; }
+  .topbar-inner .meta { color: #5c5a54; }
+
+  .container { max-width: 1240px; margin: 0 auto; padding: 0 32px 120px; }
+
+  header.masthead { padding: 96px 0 56px; border-bottom: 1px solid #1a1a18; }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: #5c5a54; margin-bottom: 24px;
   }
-  .tagline {
-    color: var(--muted);
-    font-size: 1rem;
-    font-style: italic;
-    margin: 0 0 4px;
+  h1.title {
+    font-family: 'Newsreader', Georgia, serif; font-weight: 500;
+    font-size: clamp(44px, 6vw, 76px); line-height: 1.03; letter-spacing: -0.025em;
+    margin-bottom: 32px; max-width: 16ch;
   }
-  .byline {
-    color: var(--muted-dim);
-    font-size: 0.85rem;
-    margin: 0;
+  .lede {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 21px; line-height: 1.6; color: #3d3b36;
+    max-width: 62ch; text-wrap: pretty;
   }
-  .intro {
-    color: var(--text);
-    font-size: 1.02rem;
-    margin: 40px 0 48px;
-    border-left: 3px solid var(--muted-dim);
-    padding: 4px 0 4px 20px;
+
+  .issues-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 20px;
+    border-bottom: 1px solid #1a1a18; padding: 56px 0 12px; margin-bottom: 8px;
   }
-  h2 {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 1.3rem;
-    color: var(--muted);
-    font-weight: 600;
-    margin: 0 0 22px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+  .issues-head h2 {
+    font-family: 'Newsreader', Georgia, serif; font-weight: 500;
+    font-size: 32px; letter-spacing: -0.02em;
   }
-  .issues {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  .issues-head .tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #5c5a54;
   }
+
   .issue {
-    display: block;
-    background: var(--card);
-    border-radius: 10px;
-    padding: 22px 24px;
-    margin-bottom: 16px;
-    text-decoration: none;
-    color: var(--text);
-    border-left: 4px solid var(--accent);
-    transition: transform 0.15s ease, background 0.15s ease;
+    display: grid; grid-template-columns: 48px minmax(0,1fr) auto; gap: 28px;
+    align-items: baseline;
+    padding: 32px 0; border-bottom: 1px solid #e6e2d8;
+    text-decoration: none; color: inherit;
+    transition: background 0.15s ease;
   }
-  .issue:hover {
-    background: #24324a;
-    transform: translateX(3px);
+  .issue:hover { background: #efece2; }
+  .issue .num {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8a867c;
   }
-  .issue-title {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 1.35rem;
-    color: #f8fafc;
-    margin: 0 0 4px;
+  .issue .issue-title {
+    font-family: 'Newsreader', Georgia, serif; font-weight: 600; font-size: 24px;
+    line-height: 1.3; margin-bottom: 8px; display: block;
   }
-  .issue-meta {
-    color: var(--muted);
-    font-size: 0.85rem;
-    margin: 0;
+  .issue .issue-desc {
+    font-family: 'Newsreader', Georgia, serif; font-size: 17px; line-height: 1.6;
+    color: #3d3b36; max-width: 64ch; text-wrap: pretty; display: block;
   }
+  .issue .issue-date {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: #5c5a54;
+    white-space: nowrap;
+  }
+
   footer {
-    margin-top: 72px;
-    padding-top: 24px;
-    border-top: 1px solid var(--rule);
+    margin-top: 88px; padding-top: 24px; border-top: 1px solid #e6e2d8;
     text-align: center;
-    color: var(--muted-dim);
-    font-size: 0.85rem;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: #8a867c;
+    line-height: 2;
   }
-  a.plain { color: var(--accent); text-decoration: none; }
-  a.plain:hover { text-decoration: underline; }
+
+  @media (max-width: 1000px) {
+    .issue { grid-template-columns: 1fr; gap: 8px; }
+    .issue .issue-date { margin-top: 4px; }
+  }
+  @media (max-width: 600px) {
+    .container, .topbar-inner { padding-left: 20px; padding-right: 20px; }
+    header.masthead { padding-top: 64px; }
+  }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>AI Policy, Explained</h1>
-      <hr class="rule">
-      <p class="tagline">A monthly digest of AI policy, in plain language.</p>
-      <p class="byline">By Mariyan Silva</p>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html">AI Policy, Explained</a>
+      <span class="meta">Monthly &middot; Est. 2026</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <header class="masthead">
+      <p class="eyebrow">A monthly digest &middot; By Mariyan Silva</p>
+      <h1 class="title">AI Policy, Explained</h1>
+      <p class="lede">The AI policy landscape shifts constantly, and keeping pace with it is part of the job for anyone working in this field. It matters just as much to be able to explain what's happening in plain language that a client or colleague without a legal or technical background can actually follow. That's what this digest is for. It's a single monthly round-up of the developments worth knowing, drawn only from reputable sources, with a Harvard-style reference for every item so you can verify it yourself and dig deeper wherever you want.</p>
     </header>
 
-    <p class="intro">The AI policy landscape shifts constantly, and keeping pace with it is part of the job for anyone working in this field. It matters just as much to be able to explain what's happening in plain language that a client or colleague without a legal or technical background can actually follow. That's what this digest is for. It's a single monthly round-up of the developments worth knowing, drawn only from reputable sources, with a Harvard-style reference for every item so you can verify it yourself and dig deeper wherever you want.</p>
+    <div class="issues-head">
+      <h2>Issues</h2>
+      <span class="tag">Archive</span>
+    </div>
 
-    <h2>Issues</h2>
-    <ul class="issues">
-      <li>
-        <a class="issue" href="july-2026.html">
-          <p class="issue-title">July 2026</p>
-          <p class="issue-meta">Issue 01 &middot; The EU AI Act's transparency rules, state-level regulation battles, and the open-weight safety debate.</p>
-        </a>
-      </li>
-    </ul>
+    <a class="issue" href="july-2026.html">
+      <span class="num">01</span>
+      <span>
+        <span class="issue-title">July 2026</span>
+        <span class="issue-desc">The EU AI Act's transparency rules come into force, state-level regulation battles play out in the US, and the debate over open-weight model safety intensifies.</span>
+      </span>
+      <span class="issue-date">Issue 01</span>
+    </a>
 
     <footer>
       &copy; 2026 Mariyan Silva. All rights reserved.<br>
       This work may not be reproduced or republished, in whole or in part, without permission.
     </footer>
   </div>
+
   <script data-goatcounter="https://aipolicy.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
